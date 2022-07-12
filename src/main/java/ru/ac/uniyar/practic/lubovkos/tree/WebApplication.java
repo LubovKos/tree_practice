@@ -12,16 +12,21 @@ import java.util.Set;
 public class WebApplication extends Application {
 
     private List<String> list = new ArrayList<>();
+    private List<Node> ListTree = new ArrayList<>();
     private Node root;
 
     public WebApplication() {
-        root = new Node("Корень");
-        Node child = new Node("Лист1");
-        Node child2 = new Node("Лист2");
-        Node child3 = new Node("Лист3");
+        root = new Node("Root");
+        Node child = new Node("List1");
+        Node child2 = new Node("List2");
+        Node child3 = new Node("List3");
         root.add(child);
         child.add(child2);
         root.add(child3);
+        ListTree.add(root);
+        ListTree.add(child);
+        ListTree.add(child2);
+        ListTree.add(child3);
 
         list.add("aaa");
         list.add("bbb");
@@ -36,7 +41,7 @@ public class WebApplication extends Application {
     @Override
     public Set<Object> getSingletons() {
         Set<Object> resources = new HashSet<>();
-        resources.add(new ListPresentationController(list, root));
+        resources.add(new ListPresentationController(list, root, ListTree));
         return resources;
     }
 }

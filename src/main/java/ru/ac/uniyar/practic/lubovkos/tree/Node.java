@@ -37,9 +37,12 @@ public class Node {
     //удаление узла по идентификатору
     public void deleteNode(String ident){
         int idx = -1;
-        for (int i = 0; i<children.size(); i++)
+        for (int i = 0; i < children.size(); i++){
             if (children.get(i).id == ident)
                 idx = i;
+            else
+                children.get(i).deleteNode(ident);
+        }
         if (idx != -1)
             children.remove(idx);
     }
@@ -55,7 +58,7 @@ public class Node {
         if (node == null) return res;
 
         for (int i = 0; i < space; i++)
-            res += " ";
+            res += "\t";
         if (node.children == null)
             return res.toString();
 

@@ -1,5 +1,7 @@
 package ru.ac.uniyar.practic.lubovkos.tree;
 
+import com.sun.xml.txw2.output.IndentingXMLFilter;
+
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -17,15 +19,19 @@ import java.util.List;
 @Path("/")
 public class ListPresentationController {
     private final List<String> list;
+    private final List<Node> ListTree;
     private final Node root;
     /**
      * Запоминает список, с которым будет работать.
      * @param list список, с которым будет работать контроллер.
      */
-    public ListPresentationController(List<String> list, Node root) {
+    public ListPresentationController(List<String> list, Node root, List<Node> ListTree) {
         this.list = list;
         this.root = root;
+        this.ListTree = ListTree;
     }
+
+    int idx = 4;
 
     /**
      * Пример вывода простого текста.
@@ -86,6 +92,21 @@ public class ListPresentationController {
         }
     }
 
+    @POST
+    @Path("add_item_tree")
+    @Produces("text/html")
+    public Response addItemTree() {
+        String name = "List" + String.valueOf(idx);
+        Node node = new Node(name);
+        root.add(node);
+        idx++;
+        try {
+            return Response.seeOther(new URI("/tree")).build();
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException("Ошибка построения URI для перенаправления");
+        }
+    }
+
     /**
      * Выводит страничку для редактирования одного элемента.
      * @param itemId индекс элемента списка.
@@ -114,6 +135,30 @@ public class ListPresentationController {
         return result;
     }
 
+    @GET
+    @Path("/editTree/{id}")
+    @Produces("text/html")
+    public String getEditPageTree(@PathParam("id") int itemId) {
+        Node listItem = ListTree.get(itemId);
+        String result =
+                "<html>" +
+                        "  <head>" +
+                        "    <title>Редактирование элемента дерева</title>" +
+                        "  </head>" +
+                        "  <body>" +
+                        "    <h1>Редактирование элемента дерева</h1>" +
+                        "    <form method=\"post\" action=\"/editTree/" + itemId + "\">" +
+                        "      <p>Значение</p>" +
+                        "      <input type=\"text\" name=\"value\" value=\"" + listItem.getName() +"\"/>" +
+                        "      <input type=\"submit\"/>";
+        result +=
+                "            </form>" +
+                        "  </body>" +
+                        "</html>";
+        return result;
+    }
+
+
     /**
      * Редактирует элемент списка на основе полученных данных.
      * @param itemId индекс элемента списка.
@@ -130,6 +175,21 @@ public class ListPresentationController {
             throw new IllegalStateException("Ошибка построения URI для перенаправления");
         }
     }
+
+    @POST
+    @Path("/editTree/{id}")
+    @Produces("text/html")
+    public Response editItemTree(@PathParam("id") int itemId, @FormParam("value") String itemValue) {
+        Node node = ListTree.get(itemId);
+        node.name = itemValue;
+        ListTree.set(itemId, node);
+        try {
+            return Response.seeOther(new URI("/tree")).build();
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException("Ошибка построения URI для перенаправления");
+        }
+    }
+
 
     /**
      * Пример вывода вложенного списка.
@@ -160,7 +220,7 @@ public class ListPresentationController {
     @Path("tree")
     @Produces("text/html")
     public String getTree() {
-        return "<html>" +
+        String result =  "<html>" +
                 "  <head>" +
                 "    <title>Вывод дерева</title>" +
                 "  </head>" +
@@ -169,6 +229,27 @@ public class ListPresentationController {
                 root.printToHtml(root) +
                 "  </body>" +
                 "</html>";
+        //<ul> <li> Корень<ul> <li> Лист1<ul> <li>Лист2<ul></ul> </li></ul> </li> <li>Лист3<ul></ul></li></ul></li>
+        String [] path = result.split("<li>");
+        String res = "";
+        for (int i = 0; i < path.length; i++) {
+            String listItem = path[i];
+            if (i == path.length - 1)
+                res += "<li>" + listItem + " <a href=\"editTree/" + i + "\"></a> </li>";
+            else if (i==0)
+                res += listItem + " <a href=\"editTree/" + i + "\">Редактировать</a>";
+            else
+                res += "<li>" + listItem + " <a href=\"editTree/" + i + "\">Редактировать</a> </li>";
+        }
+
+        res += "    </ul>" +
+                "      <br/>" +
+                "      <form method=\"post\" action=\"add_item_tree\">" +
+                "        <input type=\"submit\" value=\"Add item tree\"/>" +
+                "      </form>" +
+                "  </body>" +
+                "</html>";
+        return res;
     }
 
 }

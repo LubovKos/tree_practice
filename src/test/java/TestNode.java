@@ -23,7 +23,7 @@ public class TestNode {
     }
 
     @Test
-    void deleteNode(){
+    void deleteNodeId(){
         Node root1 = new Node("Корень");
         Node child1 = new Node("Лист1");
         Node child2 = new Node("Лист2");
@@ -36,8 +36,75 @@ public class TestNode {
         root2.add(child1);
         root2.add(child2);
 
-        root1.deleteNode(child3.id);
+        root1.deleteNodeId(child3.id);
         assertEquals(root1.children, root2.children);
+    }
+
+    @Test
+    void deleteNodeName(){
+        Node root1 = new Node("Корень");
+        Node child1 = new Node("Лист1");
+        Node child2 = new Node("Лист2");
+        Node child3 = new Node("Лист3");
+        root1.add(child1);
+        root1.add(child2);
+        root1.add(child3);
+
+        Node root2 = new Node("Корень");
+        root2.add(child2);
+        root2.add(child3);
+
+        root1.deleteNodeName("Лист1");
+        assertEquals(root1.children, root2.children);
+    }
+
+    @Test
+    void deleteAllChildren(){
+        Node root1 = new Node("Корень");
+        Node child = new Node("Лист1");
+        Node child2 = new Node("Лист2");
+        Node child3 = new Node("Лист3");
+        Node child4 = new Node("Лист4");
+        Node child5 = new Node("Лист5");
+        Node child6 = new Node("Лист6");
+        root1.add(child);
+        child.add(child2);
+        root1.add(child3);
+        child.add(child4);
+        child2.add(child5);
+        child5.add(child6);
+
+        Node root2 = new Node("Корень");
+        Node child1 = new Node("Лист1");
+        Node child22 = new Node("Лист2");
+        Node child23 = new Node("Лист3");
+        Node child24 = new Node("Лист4");
+        root2.add(child);
+        child1.add(child22);
+        root2.add(child23);
+        child1.add(child24);
+
+        child2.deleteAllChildren();
+        assertEquals(child2.children, child22.children);
+    }
+
+    @Test
+    void changeNode(){
+        Node child = new Node("Лист1");
+        Node child1 = new Node("Лист2");
+
+        child.changeNode("Лист2");
+        assertEquals(child.name, child1.name);
+    }
+
+    @Test
+    void findNode(){
+        Node root = new Node("Корень");
+        Node child = new Node("Лист1");
+        root.add(child);
+
+        Node child1 = root.findNode("Лист1");
+        assertEquals(child1, child);
     }
 
     @Test

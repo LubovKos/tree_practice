@@ -1,5 +1,9 @@
 package ru.ac.uniyar.practic.lubovkos.tree;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -29,22 +33,70 @@ public class Node {
         return name;
     }
 
-    //добавление ребенка
+    //добавление узла в дерево (добавление ребенка)
     public void add(Node _child) {
         children.add(_child);
     }
 
+    //удаление узла по имени
+    public void deleteNodeName(String name){
+        int idx = -1;
+        for (int i = 0; i < children.size(); i++){
+            if (children.get(i).name == name)
+                idx = i;
+            else
+                children.get(i).deleteNodeName(name);
+        }
+        if (idx != -1){
+            List<Node> newChildren =  new ArrayList<>();
+            for (int i = 0; i< idx; i++)
+                newChildren.add(children.get(i));
+            for (Node child: children.get(idx).children)
+                newChildren.add(child);
+            for (int i = idx + 1; i< children.size(); i++)
+                newChildren.add(children.get(i));
+            children = newChildren;
+        }
+    }
+
     //удаление узла по идентификатору
-    public void deleteNode(String ident){
+    public void deleteNodeId(String ident){
         int idx = -1;
         for (int i = 0; i < children.size(); i++){
             if (children.get(i).id == ident)
                 idx = i;
             else
-                children.get(i).deleteNode(ident);
+                children.get(i).deleteNodeId(ident);
         }
-        if (idx != -1)
-            children.remove(idx);
+        if (idx != -1){
+            List<Node> newChildren = new ArrayList<>();
+            for (int i = 0; i< idx; i++)
+                newChildren.add(children.get(i));
+            for (Node child: children.get(idx).children)
+                newChildren.add(child);
+            for (int i = idx + 1; i< children.size(); i++)
+                newChildren.add(children.get(i));
+            children = newChildren;
+        }
+    }
+
+    //удаление всех дочерних узлов
+    public void deleteAllChildren(){
+        for (int i = 0; i < children.size(); i++)
+            children.remove(children.get(i));
+    }
+
+    //поиск дочернего узла по имени
+    public Node findNode(String name){
+        for (Node child: children)
+            if (child.name == name)
+                return child;
+        return null;
+    }
+
+    //изменение значения (имени) узла
+    public void changeNode(String _name){
+        name = _name;
     }
 
     //преобразование дерева в строку
@@ -70,26 +122,17 @@ public class Node {
         return res.toString();
     }
 
-    private String toHtml(Node pos) {
-        if (pos == null) return "";
-        StringBuilder answer = new StringBuilder();
-
-        answer.append("<li>").append(pos.name);
-        if (pos.children == null)
-            return answer.append("</li>").toString();
-
-        answer.append("<ul>");
-        for (Node child : pos.children)
-            answer.append(toHtml(child));
-        answer.append("</ul>");
-        return answer.append("</li>").toString();
+    //запись дерева в файл
+    public void printToFile(String path) throws IOException {
+        String content = toString();
+        Files.write(Paths.get(path), content.getBytes());
     }
 
-
+    //запись дерева для отображения на сайте
     public String printToHtml(Node node) {
-        String res = "<ul>";
         if (node == null) return "";
 
+        String res = "";
         res += "<li>";
         res += node.name;
 
@@ -99,7 +142,7 @@ public class Node {
         }
         res += "<ul>";
         for (Node child : node.children)
-            res += toHtml(child);
+            res += printToHtml(child);
         res += ("</ul>" + "</li>");
         return res.toString();
     }
